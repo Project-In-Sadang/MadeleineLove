@@ -2,25 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-    --foreground-rgb: 98, 70, 125;
-    --background-rgb: 236, 225, 248;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --foreground-rgb: 255, 255, 255;
-        --background-rgb: 0, 0, 0;
-    }
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
 }
 
 body {
-    color: rgb(var(--foreground-rgb));
-    background-color: rgb(var(--background-rgb));
-}
-
-@layer utilities {
-    .text-balance {
-        text-wrap: balance;
-    }
+    font-family: 'Pretendard-Regular';
+    background: linear-gradient(to bottom, #d6bdf1, #9890d4);
 }
