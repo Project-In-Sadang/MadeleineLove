@@ -5,31 +5,26 @@ interface WelcomeProps {
     iconSrc: string;
     description: string;
     className?: string;
-    iconSz?: number;
-    onClick?: () => void;
+    iconSz: number;
+    onClick: () => void;
 }
 
 export default function WelcomeButton({
     iconSrc,
-    className,
+    className = 'bg-white text-black',
     onClick,
     description,
-    iconSz = 19,
+    iconSz,
 }: WelcomeProps) {
     return (
-        <button onClick={onClick}>
+        <button onClick={onClick} className="w-full">
             <FlexBox
                 direction="row"
-                className={`w-[245px] h-[46px] gap-4 justify-center items-center
-                    text-base rounded
+                className={`py-3.5 w-full gap-4 justify-center items-center
+                    text-base rounded-md font-semibold
                     ${className}`}
             >
-                <Image
-                    src={iconSrc}
-                    alt="welcomeicon"
-                    width={iconSz}
-                    height={iconSz}
-                />
+                <Image src={iconSrc} alt="welcomeicon" width={iconSz} height={iconSz} />
                 {description}
             </FlexBox>
         </button>
