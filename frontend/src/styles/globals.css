@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Pretendard-Regular';
+    font-family: 'Pretendard';
     src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
-    font-weight: 400;
+    font-weight: normal;
     font-style: normal;
 }
 
 body {
-    font-family: 'Pretendard-Regular';
-    background: linear-gradient(to bottom, #d6bdf1, #9890d4);
+    font-family: 'Pretendard';
+    background: linear-gradient(to bottom, rgba(215, 190, 242, 0.73), rgba(153, 145, 213, 0.82));
 }
