@@ -1,4 +1,6 @@
-import FlexBox from '@/components/layout/FlexBox';
+'use client';
+
+import FlexBox from '@/components/FlexBox';
 import letter from '@/public/icon/heart/letter.svg';
 import Image from 'next/image';
 import WelcomeButton from '@/components/button/WelcomeButton';

@@ -1,4 +1,4 @@
-import FlexBox from '../layout/FlexBox';
+import FlexBox from '@/components/FlexBox';
 import Image from 'next/image';
 
 interface WelcomeProps {
