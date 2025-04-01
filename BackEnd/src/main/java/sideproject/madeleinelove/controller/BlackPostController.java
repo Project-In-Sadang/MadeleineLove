@@ -48,19 +48,21 @@ public class BlackPostController {
 
     @GetMapping("/black/post")
     public ResponseEntity<PagedResponse<BlackPostDto>> getPosts(
+            HttpServletRequest request, HttpServletResponse response,
+            @Valid @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String userId) {
-        List<BlackPostDto> dtos = blackPostService.getPosts(sort, cursor, size, userId);
+            @RequestParam(defaultValue = "10") int size) {
+        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+        List<BlackPostDto> dtos = blackPostService.getPosts(request, response, accessTokenToUse.getAccessToken(), sort, cursor, size);
 
         String nextCursor = blackPostService.getNextCursor(dtos, sort);
 
-        PagedResponse<BlackPostDto> response = new PagedResponse<>();
-        response.setData(dtos);
-        response.setNextCursor(nextCursor);
+        PagedResponse<BlackPostDto> pagedResponse = new PagedResponse<>();
+        pagedResponse.setData(dtos);
+        pagedResponse.setNextCursor(nextCursor);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(pagedResponse);
     }
 
     @PostMapping("/black")

@@ -42,7 +42,8 @@ public class WhitePostService {
 
     private static final Logger logger = LoggerFactory.getLogger(WhitePostService.class);
 
-    public List<WhitePostDto> getPosts(String sort, String cursor, int size, String userId) {
+    public List<WhitePostDto> getPosts(HttpServletRequest request, HttpServletResponse response, String accessToken, String sort, String cursor, int size) {
+        String userId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken).toString();
         Pageable pageable = PageRequest.of(0, size + 1); // 다음 페이지 확인을 위해 size + 1
 
         List<WhitePost> posts;

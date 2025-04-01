@@ -45,22 +45,24 @@ public class WhitePostController {
             return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
         }
     }
-          
+
     @GetMapping("/white/post")
     public ResponseEntity<PagedResponse<WhitePostDto>> getPosts(
+            HttpServletRequest request, HttpServletResponse response,
+            @Valid @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String userId) {
-        List<WhitePostDto> dtos = whitePostService.getPosts(sort, cursor, size, userId);
+            @RequestParam(defaultValue = "10") int size) {
+        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+        List<WhitePostDto> dtos = whitePostService.getPosts(request, response, accessTokenToUse.getAccessToken(), sort, cursor, size);
 
         String nextCursor = whitePostService.getNextCursor(dtos, sort);
 
-        PagedResponse<WhitePostDto> response = new PagedResponse<>();
-        response.setData(dtos);
-        response.setNextCursor(nextCursor);
+        PagedResponse<WhitePostDto> pagedResponse = new PagedResponse<>();
+        pagedResponse.setData(dtos);
+        pagedResponse.setNextCursor(nextCursor);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(pagedResponse);
     }
 
     @PostMapping("/white")
