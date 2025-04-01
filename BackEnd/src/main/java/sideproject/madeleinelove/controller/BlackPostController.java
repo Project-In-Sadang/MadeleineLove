@@ -65,6 +65,20 @@ public class BlackPostController {
         return ResponseEntity.ok(pagedResponse);
     }
 
+    @GetMapping("/black/post/best")
+    public ResponseEntity<PagedResponse<BlackPostDto>> getPosts(
+            HttpServletRequest request, HttpServletResponse response,
+            @Valid @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+        List<BlackPostDto> dtos = blackPostService.getBestPosts(request, response, accessTokenToUse.getAccessToken());
+
+        PagedResponse<BlackPostDto> pagedResponse = new PagedResponse<>();
+        pagedResponse.setData(dtos);
+
+        return ResponseEntity.ok(pagedResponse);
+    }
+
     @PostMapping("/black")
     public ResponseEntity<ApiResponse<Object>> createBlackPost(HttpServletRequest request, HttpServletResponse response,
                                                                @Valid @RequestHeader("Authorization") String authorizationHeader,

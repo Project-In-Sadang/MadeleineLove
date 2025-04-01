@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sideproject.madeleinelove.dto.BlackPostDto;
 import sideproject.madeleinelove.dto.BlackRequestDto;
+import sideproject.madeleinelove.dto.WhitePostDto;
 import sideproject.madeleinelove.entity.*;
 import sideproject.madeleinelove.exception.PostErrorResult;
 import sideproject.madeleinelove.exception.PostException;
@@ -44,28 +45,32 @@ public class BlackPostService {
 
         List<BlackPost> posts;
 
-        switch (sort.toLowerCase()) {
-            case "best":
-                // 좋아요 내림차순 상위 3개 => cursor / size 무시
-                posts = blackPostRepository.findTop3ByOrderByLikeCountDesc();
-                break;
-            case "recommended":
-                // 좋아요 기반 커서 페이지네이션
-                posts = getPostsByLikesCount(cursor, pageable);
-                break;
-            default:
-                // "latest" 등 -> 최신순 커서 페이지네이션
-                posts = getPostsByLatest(cursor, pageable);
-                break;
+        if (sort.equals("recommended")) {
+            posts = getPostsByLikesCount(cursor, pageable);
+        } else if (sort.equals("latest")) {
+            posts = getPostsByLatest(cursor, pageable);
+        } else {
+            throw new IllegalArgumentException("잘못된 sort 값입니다. 'recommended' 또는 'latest'만 허용됩니다. 전달된 값: " + sort);
         }
 
-        boolean hasNext = false;
-        if (!"best".equalsIgnoreCase(sort)) {
-            hasNext = (posts.size() > size);
-            if (hasNext) {
-                posts = posts.subList(0, size);
-            }
+        boolean hasNext = (posts.size() > size);
+        if (hasNext) {
+            // 다음 페이지가 존재하므로, size 개까지만 잘라서 클라이언트에 전달
+            posts = posts.subList(0, size);
         }
+
+        // 사용자 좋아요 정보 가져오기
+        Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);
+
+        // DTO 변환 및 isLiked 설정
+        return posts.stream()
+                .map(post -> convertToDto(post, likedPostIds))
+                .collect(Collectors.toList());
+    }
+
+    public List<BlackPostDto> getBestPosts(HttpServletRequest request, HttpServletResponse response, String accessToken) {
+        String userId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken).toString();
+        List<BlackPost> posts = blackPostRepository.findTop3ByOrderByLikeCountDesc();
 
         // 사용자 좋아요 정보 가져오기
         Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);

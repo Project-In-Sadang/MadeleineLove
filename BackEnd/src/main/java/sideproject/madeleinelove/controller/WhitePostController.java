@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sideproject.madeleinelove.base.ApiResponse;
+import sideproject.madeleinelove.base.ListApiResponse;
 import sideproject.madeleinelove.base.SuccessStatus;
 import sideproject.madeleinelove.dto.*;
 import sideproject.madeleinelove.service.TokenServiceImpl;
@@ -61,6 +62,20 @@ public class WhitePostController {
         PagedResponse<WhitePostDto> pagedResponse = new PagedResponse<>();
         pagedResponse.setData(dtos);
         pagedResponse.setNextCursor(nextCursor);
+
+        return ResponseEntity.ok(pagedResponse);
+    }
+
+    @GetMapping("/white/post/best")
+    public ResponseEntity<PagedResponse<WhitePostDto>> getPosts(
+            HttpServletRequest request, HttpServletResponse response,
+            @Valid @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+        List<WhitePostDto> dtos = whitePostService.getBestPosts(request, response, accessTokenToUse.getAccessToken());
+
+        PagedResponse<WhitePostDto> pagedResponse = new PagedResponse<>();
+        pagedResponse.setData(dtos);
 
         return ResponseEntity.ok(pagedResponse);
     }
