@@ -66,7 +66,7 @@ public class BlackPostController {
     }
 
     @GetMapping("/black/post/best")
-    public ResponseEntity<PagedResponse<BlackPostDto>> getPosts(
+    public ResponseEntity<PagedResponse<BlackPostDto>> getBestPosts(
             HttpServletRequest request, HttpServletResponse response,
             @Valid @RequestHeader("Authorization") String authorizationHeader
     ) {

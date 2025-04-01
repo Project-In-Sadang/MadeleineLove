@@ -67,7 +67,7 @@ public class WhitePostController {
     }
 
     @GetMapping("/white/post/best")
-    public ResponseEntity<PagedResponse<WhitePostDto>> getPosts(
+    public ResponseEntity<PagedResponse<WhitePostDto>> getBestPosts(
             HttpServletRequest request, HttpServletResponse response,
             @Valid @RequestHeader("Authorization") String authorizationHeader
     ) {
