@@ -1,15 +1,15 @@
 'use client';
 
 import FlexBox from '@/components/FlexBox';
-import letter from '@/public/icon/heart/letter.svg';
+import letter from '@/assets/icons/heart/letter.svg';
 import Image from 'next/image';
 import WelcomeButton from '@/components/WelcomeButton';
-import naver from '@/public/icon/naver.svg';
-import kakao from '@/public/icon/kakao.svg';
-import first_all from '@/public/icon/heart/first_all.svg';
-import google from '@/public/icon/google.svg';
+import naver from '@/assets/icons/naver.svg';
+import kakao from '@/assets/icons/kakao.svg';
+import first_all from '@/assets/icons/heart/first_all.svg';
+import google from '@/assets/icons/google.svg';
 import { useRouter } from 'next/navigation';
-import { redirectToSocial } from '@/api/social';
+import { redirectToSocial } from '@/apis/social';
 
 export default function Welcome() {
     const router = useRouter();

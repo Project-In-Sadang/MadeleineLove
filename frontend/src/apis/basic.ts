@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const api = axios.create({
@@ -8,5 +9,14 @@ const api = axios.create({
         Accept: 'application/json',
     },
 });
+
+api.interceptors.request.use(
+    async (config) => {
+        const token = localStorage.getItem('access_token');
+        config.headers.set('Authorization', `Bearer ${token}`);
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 export default api;

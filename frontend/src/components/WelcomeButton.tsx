@@ -19,7 +19,6 @@ export default function WelcomeButton({
     return (
         <button onClick={onClick} className="w-full">
             <FlexBox
-                direction="row"
                 className={`py-3.5 w-full gap-4 justify-center items-center
                     text-base rounded-md font-semibold
                     ${className}`}
