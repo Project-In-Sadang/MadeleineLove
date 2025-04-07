@@ -4,7 +4,7 @@
 
 @font-face {
     font-family: 'Pretendard';
-    src: url('../public/font/PretendardVariable.ttf') format('woff');
+    src: url('../assets/fonts/PretendardVariable.ttf') format('woff');
 }
 
 body {
