@@ -1,5 +1,3 @@
-'use client';
-
 import FlexBox from '@/components/FlexBox';
 import letter from '@/assets/icons/heart/letter.svg';
 import Image from 'next/image';
