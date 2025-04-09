@@ -1,148 +1,144 @@
-import TwoCircle from '@/components/background/TwoCircle';
-import FlexBox from '@/components/layout/FlexBox';
-import HomeButton from '@/components/button/HomeButton';
-import TextBox from '@/components/Box/TextBox';
-import MethodButton from '@/components/button/MethodButton';
-import CompleteButton from '@/components/button/CompleteButton';
-import ballonheart from '@/public/icon/heart/ballon_heart.svg';
-import fireheart from '@/public/icon/heart/fire_heart.svg';
-import cakeheart from '@/public/icon/heart/cake_heart.svg';
-import bottleheart from '@/public/icon/heart/bottle_heart.svg';
-import Modal from '@/components/Box/Modal';
-import { useState, useEffect } from 'react';
-import { usePostBlack } from '@/hook_query/postHeart';
+import FlexBox from '@/components/FlexBox';
+import TextBox from '@/components/TextBox';
+import MethodButton from '@/components/MethodButton';
+import CompleteButton from '@/components/CompleteButton';
+import fly from '@/assets/icons/heart/fly.svg';
+import eat from '@/assets/icons/heart/eat.svg';
+import burn from '@/assets/icons/heart/burn.svg';
+import melt from '@/assets/icons/heart/melt.svg';
+import Modal from '@/components/Modal';
+import { useState } from 'react';
+import router from 'next/router';
+import Header from '@/components/Header';
+import { ModalType } from '@/utils/type';
+import { postBlack } from '@/apis/postHeart';
 
 export default function Black() {
     const [selectedMethod, setSelectedMethod] = useState<number | null>(null);
-    const [loveMessage, setLoveMessage] = useState<string>('');
+    const [content, setContent] = useState<string>('');
     const [nickname, setNickname] = useState<string>('레니');
-    const [showModal, setShowModal] = useState<boolean>(false);
-    const [modalContent, setModalContent] = useState<string>('');
-    const [modalButtonCount, setModalButtonCount] = useState<'one' | 'two'>(
-        'one'
-    );
-    const { mutate: postBlack } = usePostBlack();
+    const [showModal, setShowModal] = useState(false);
+    const [modalState, setModalState] = useState<ModalType>('cancelWrite');
 
-    useEffect(() => {}, [nickname, loveMessage, selectedMethod]);
+    const modalMap = {
+        cancelWrite: {
+            content: '작성을 취소하시겠습니까?',
+            buttonCount: 'two',
+        },
+        confirmWrite: {
+            content: '작성을 완료하시겠습니까?',
+            buttonCount: 'two',
+        },
+        emptyContent: {
+            content: '글을 작성해주세요',
+            buttonCount: 'one',
+        },
+        emptyMethod: {
+            content: '비우기 방법을 선택해주세요',
+            buttonCount: 'one',
+        },
+    } as const;
 
-    const handleEmptyLove = () => {
-        if (loveMessage !== '') {
-            setModalContent('작성을 취소하시겠습니까?');
-            setModalButtonCount('two');
+    const handleChevron = () => {
+        if (content !== '') {
+            setModalState('cancelWrite');
             setShowModal(true);
         } else {
-            // 이동
+            router.push('/main');
         }
     };
 
     const handleComplete = () => {
-        if (loveMessage === '') {
-            setModalContent('글을 작성해주세요');
-            setModalButtonCount('one');
+        if (content === '') {
+            setModalState('emptyContent');
         } else if (selectedMethod === null) {
-            setModalContent('비우기 방법을 선택해주세요');
-            setModalButtonCount('one');
+            setModalState('emptyMethod');
         } else {
-            setModalContent('작성을 완료하시겠습니까?');
-            setModalButtonCount('two');
+            setModalState('confirmWrite');
         }
         setShowModal(true);
     };
 
-    const handleCancel = () => {
-        setShowModal(false);
-    };
-
-    const handleMethodClick = (methodId: number) => {
-        setSelectedMethod(methodId);
-    };
-
-    const handleConfirm = () => {
-        setShowModal(false);
-        postBlack({
-            nickName: nickname,
-            content: loveMessage,
-            cleanMethod: selectedMethod || 0, // 0이면 null , 백엔드와 상의
-        });
-        console.log('api성공');
-        // 이동
+    const handleConfirm = async () => {
+        if (modalState === 'cancelWrite') {
+            router.push('/main');
+        } else {
+            try {
+                await postBlack({
+                    nickName: nickname,
+                    content: content,
+                    methodNumber: selectedMethod || 0,
+                });
+                router.push('/allHeart');
+            } catch (error) {
+                alert('문제가 발생했어요. 다시 시도해주세요.');
+            }
+        }
     };
 
     return (
-        <>
-            <div className="flex absolute z-0 w-screen h-screen">
-                <TwoCircle />
-            </div>
-            <div className="relative z-10 w-screen h-screen">
-                <div className="flex py-9 w-full pl-7">
-                    <HomeButton onClick={handleEmptyLove} />
-                </div>
-                <FlexBox direction="col" className="px-10 gap-7 pb-7">
-                    <div>
-                        <div className="text-lg mb-2.5">
-                            닉네임을 적어주세요 (선택){' '}
-                        </div>
-                        <TextBox
-                            height={40}
-                            className="rounded-3xl px-4 py-2"
-                            placeholder="레니"
-                            onChange={(e) => setNickname(e.target.value)}
-                            maxLength={12}
-                        />
-                    </div>
-                    <div>
-                        <div className="text-lg mb-2.5">
-                            최악의 사랑을 풀어주세요{' '}
-                        </div>
-                        <TextBox
-                            height={270}
-                            className="rounded-2xl p-4"
-                            onChange={(e) => setLoveMessage(e.target.value)}
-                            maxLength={500}
-                        />
-                    </div>
-                    <div className="pb-1.5">
-                        <div className="text-lg mb-2.5">어떻게 비워낼까요?</div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <MethodButton
-                                description="닦아서"
-                                heartSrc={bottleheart}
-                                isSelected={selectedMethod === 1}
-                                onClick={() => handleMethodClick(1)}
-                            />
-                            <MethodButton
-                                description="날려서"
-                                heartSrc={ballonheart}
-                                isSelected={selectedMethod === 2}
-                                onClick={() => handleMethodClick(2)}
-                            />
-                            <MethodButton
-                                description="태워서"
-                                heartSrc={fireheart}
-                                isSelected={selectedMethod === 3}
-                                onClick={() => handleMethodClick(3)}
-                            />
-                            <MethodButton
-                                description="먹어서"
-                                heartSrc={cakeheart}
-                                isSelected={selectedMethod === 4}
-                                onClick={() => handleMethodClick(4)}
-                            />
-                        </div>
-                    </div>
-                    <CompleteButton onClick={handleComplete} />
-                </FlexBox>
-            </div>
-            {showModal && (
-                <div className="absolute z-20">
-                    <Modal
-                        description={modalContent}
-                        buttonCount={modalButtonCount}
-                        onConfirm={handleConfirm}
-                        onCancle={handleCancel}
+        <div className="min-h-screen">
+            <Header type="write" chevronOnClick={handleChevron} />
+            <FlexBox direction="col" className="px-10 pb-10 gap-7">
+                <div className="w-full">
+                    <div className="text-lg font-medium mb-3">닉네임을 적어주세요 (선택)</div>
+                    <TextBox
+                        height={40}
+                        className="rounded-3xl px-4 py-2"
+                        placeholder="레니"
+                        onChange={(e) => setNickname(e.target.value)}
+                        maxLength={12}
+                        type="nickname"
                     />
                 </div>
+                <div className="w-full">
+                    <div className="text-lg font-medium mb-3">최악의 사랑을 풀어주세요</div>
+                    <TextBox
+                        height={270}
+                        className="rounded-2xl p-4"
+                        onChange={(e) => setContent(e.target.value)}
+                        maxLength={500}
+                    />
+                </div>
+                <div className="pb-1.5 w-full">
+                    <div className="text-lg font-medium mb-3">어떻게 비워낼까요?</div>
+                    <div className="grid grid-cols-2 gap-3.5">
+                        <MethodButton
+                            description="녹여서"
+                            heartSrc={melt}
+                            isSelected={selectedMethod === 1}
+                            onClick={() => setSelectedMethod(1)}
+                        />
+                        <MethodButton
+                            description="날려서"
+                            heartSrc={fly}
+                            isSelected={selectedMethod === 2}
+                            onClick={() => setSelectedMethod(2)}
+                        />
+                        <MethodButton
+                            description="태워서"
+                            heartSrc={burn}
+                            isSelected={selectedMethod === 3}
+                            onClick={() => setSelectedMethod(3)}
+                        />
+                        <MethodButton
+                            description="먹어서"
+                            heartSrc={eat}
+                            isSelected={selectedMethod === 4}
+                            onClick={() => setSelectedMethod(4)}
+                        />
+                    </div>
+                </div>
+                <CompleteButton onClick={handleComplete} />
+            </FlexBox>
+            {showModal && (
+                <Modal
+                    description={modalMap[modalState].content}
+                    buttonCount={modalMap[modalState].buttonCount}
+                    onConfirm={handleConfirm}
+                    onClose={() => setShowModal(false)}
+                />
             )}
-        </>
+        </div>
     );
 }

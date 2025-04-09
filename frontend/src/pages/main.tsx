@@ -53,6 +53,15 @@ export default function Main() {
         setShowModal(true);
     };
 
+    const handleConfirm = async () => {
+        if (modalState === 'logout') {
+            await logoutSocial();
+        } else {
+            await withdrawSocial();
+        }
+        router.push('/');
+    };
+
     useEffect(() => {
         saveTokenFromUrl();
     }, []);
@@ -76,10 +85,7 @@ export default function Main() {
                     onClose={() => {
                         setShowModal(false);
                     }}
-                    onConfirm={() => {
-                        modalState === 'logout' ? logoutSocial() : withdrawSocial();
-                        router.push('/');
-                    }}
+                    onConfirm={handleConfirm}
                 />
             )}
         </FlexBox>

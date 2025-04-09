@@ -24,7 +24,7 @@ export default function Header({ type, chevronOnClick, onLogout, onWithdraw }: H
                         src={chevron}
                         alt="chevronicon"
                         onClick={() => {
-                            type === 'write' ? chevronOnClick : router.push('/main');
+                            type === 'write' ? chevronOnClick?.() : router.push('/main');
                         }}
                         className="cursor-pointer"
                     />
