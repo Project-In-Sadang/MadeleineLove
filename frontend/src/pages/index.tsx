@@ -46,7 +46,7 @@ export default function Welcome() {
                     description={'하트 구경하기'}
                     className="bg-[#866BDE] text-white"
                     onClick={() => {
-                        router.push('/main');
+                        router.push('/allHeart');
                     }}
                     iconSz={28}
                 />
