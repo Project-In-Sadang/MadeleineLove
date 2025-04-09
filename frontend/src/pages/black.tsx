@@ -12,6 +12,7 @@ import router from 'next/router';
 import Header from '@/components/Header';
 import { ModalType } from '@/utils/type';
 import { postBlack } from '@/apis/postHeart';
+import { modalMap } from '@/utils/map';
 
 export default function Black() {
     const [selectedMethod, setSelectedMethod] = useState<number | null>(null);
@@ -19,25 +20,6 @@ export default function Black() {
     const [nickname, setNickname] = useState<string>('레니');
     const [showModal, setShowModal] = useState(false);
     const [modalState, setModalState] = useState<ModalType>('cancelWrite');
-
-    const modalMap = {
-        cancelWrite: {
-            content: '작성을 취소하시겠습니까?',
-            buttonCount: 'two',
-        },
-        confirmWrite: {
-            content: '작성을 완료하시겠습니까?',
-            buttonCount: 'two',
-        },
-        emptyContent: {
-            content: '글을 작성해주세요',
-            buttonCount: 'one',
-        },
-        emptyMethod: {
-            content: '비우기 방법을 선택해주세요',
-            buttonCount: 'one',
-        },
-    } as const;
 
     const handleChevron = () => {
         if (content !== '') {
