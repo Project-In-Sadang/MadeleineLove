@@ -8,13 +8,14 @@ import refresh from '@/assets/icons/heart/refresh.svg';
 import sad from '@/assets/icons/heart/sad.svg';
 import Modal from '@/components/Modal';
 import { useState } from 'react';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 import { ModalType } from '@/utils/type';
 import { postWhite } from '@/apis/postHeart';
 import { modalMap } from '@/utils/map';
 import Header from '@/components/Header';
 
 export default function Black() {
+    const router = useRouter();
     const [selectedMethod, setSelectedMethod] = useState<number | null>(null);
     const [content, setContent] = useState<string>('');
     const [nickname, setNickname] = useState<string>('레니');

@@ -8,13 +8,14 @@ import burn from '@/assets/icons/heart/burn.svg';
 import melt from '@/assets/icons/heart/melt.svg';
 import Modal from '@/components/Modal';
 import { useState } from 'react';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { ModalType } from '@/utils/type';
 import { postBlack } from '@/apis/postHeart';
 import { modalMap } from '@/utils/map';
 
 export default function Black() {
+    const router = useRouter();
     const [selectedMethod, setSelectedMethod] = useState<number | null>(null);
     const [content, setContent] = useState<string>('');
     const [nickname, setNickname] = useState<string>('레니');
