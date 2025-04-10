@@ -14,6 +14,13 @@ interface PostBody {
     methodNumber: number;
 }
 
+interface AllBody {
+    data: HeartBody[];
+    nextCursor: string;
+}
+
 type ModalType = 'cancelWrite' | 'emptyContent' | 'emptyMethod' | 'confirmWrite';
 
-export type { HeartBody, PostBody, ModalType };
+type SwitchType = 'latest' | 'recommended';
+
+export type { HeartBody, PostBody, ModalType, SwitchType, AllBody };
