@@ -9,8 +9,10 @@ interface InfiniteScrollProps {
 }
 
 export default function InfiniteScroll({ type, sort }: InfiniteScrollProps) {
-    const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-        type === 'white' ? useGetAllWhite(sort) : useGetAllBlack(sort);
+    const whiteResult = useGetAllWhite(sort);
+    const blackResult = useGetAllBlack(sort);
+
+    const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = type === 'white' ? whiteResult : blackResult;
 
     const observerRef = useRef<HTMLDivElement | null>(null);
 
