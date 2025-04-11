@@ -15,6 +15,6 @@ public class BlackPostDto {
     private Integer methodNumber;
     private boolean likedByUser;
     private Integer likeCount;
-    // private Double hotScore;
+    private Double hotScore;
 
 }

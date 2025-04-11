@@ -1,5 +1,6 @@
 package sideproject.madeleinelove.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sideproject.madeleinelove.base.ApiResponse;
-import sideproject.madeleinelove.base.ListApiResponse;
 import sideproject.madeleinelove.base.SuccessStatus;
 import sideproject.madeleinelove.dto.*;
+import sideproject.madeleinelove.exception.TokenException;
 import sideproject.madeleinelove.service.TokenServiceImpl;
 import sideproject.madeleinelove.service.WhitePostService;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class WhitePostController {
 
     @DeleteMapping("/white/{postId}")
     public ResponseEntity<?> deleteWhitePost(HttpServletRequest request, HttpServletResponse response,
-                                             @Valid @RequestHeader("Authorization") String authorizationHeader,
+                                             @RequestHeader("Authorization") String authorizationHeader,
                                              @PathVariable String postId) {
         try{
             TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
@@ -47,18 +48,29 @@ public class WhitePostController {
         }
     }
 
+    @Operation(security = {})
     @GetMapping("/white/post")
     public ResponseEntity<PagedResponse<WhitePostDto>> getPosts(
             HttpServletRequest request, HttpServletResponse response,
-            @Valid @RequestHeader("Authorization") String authorizationHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size) {
-        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
-        List<WhitePostDto> dtos = whitePostService.getPosts(request, response, accessTokenToUse.getAccessToken(), sort, cursor, size);
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                TokenDTO.TokenResponse tokenRes = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+                accessToken = tokenRes.getAccessToken();
+            } catch (TokenException e) {
+                // 여기서 401을 반환할지, 게스트로 처리할지 결정
+                // 예: 게스트로 허용
+                accessToken = null;
+            }
+        }
+
+        List<WhitePostDto> dtos = whitePostService.getPosts(request, response, accessToken, sort, cursor, size);
 
         String nextCursor = whitePostService.getNextCursor(dtos, sort);
-
         PagedResponse<WhitePostDto> pagedResponse = new PagedResponse<>();
         pagedResponse.setData(dtos);
         pagedResponse.setNextCursor(nextCursor);
@@ -66,13 +78,22 @@ public class WhitePostController {
         return ResponseEntity.ok(pagedResponse);
     }
 
+    @Operation(security = {})
     @GetMapping("/white/post/best")
     public ResponseEntity<PagedResponse<WhitePostDto>> getBestPosts(
             HttpServletRequest request, HttpServletResponse response,
-            @Valid @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
     ) {
-        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
-        List<WhitePostDto> dtos = whitePostService.getBestPosts(request, response, accessTokenToUse.getAccessToken());
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                TokenDTO.TokenResponse tokenRes = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+                accessToken = tokenRes.getAccessToken();
+            } catch (TokenException e) {
+                accessToken = null;
+            }
+        }
+        List<WhitePostDto> dtos = whitePostService.getBestPosts(request, response, accessToken);
 
         PagedResponse<WhitePostDto> pagedResponse = new PagedResponse<>();
         pagedResponse.setData(dtos);
@@ -82,8 +103,8 @@ public class WhitePostController {
 
     @PostMapping("/white")
     public ResponseEntity<ApiResponse<Object>> createWhitePost(HttpServletRequest request, HttpServletResponse response,
-                                                                  @Valid @RequestHeader("Authorization") String authorizationHeader,
-                                                                  @Valid @RequestBody WhiteRequestDto whiteRequestDto) {
+                                                                  @RequestHeader("Authorization") String authorizationHeader,
+                                                                  @RequestBody WhiteRequestDto whiteRequestDto) {
 
         TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
         whitePostService.saveWhitePost(request, response, accessTokenToUse.getAccessToken(), whiteRequestDto);

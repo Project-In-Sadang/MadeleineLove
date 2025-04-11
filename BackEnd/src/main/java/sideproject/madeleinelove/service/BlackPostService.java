@@ -4,15 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sideproject.madeleinelove.dto.BlackPostDto;
 import sideproject.madeleinelove.dto.BlackRequestDto;
-import sideproject.madeleinelove.dto.WhitePostDto;
 import sideproject.madeleinelove.entity.*;
 import sideproject.madeleinelove.exception.PostErrorResult;
 import sideproject.madeleinelove.exception.PostException;
@@ -20,7 +17,6 @@ import sideproject.madeleinelove.exception.UserErrorResult;
 import sideproject.madeleinelove.exception.UserException;
 import sideproject.madeleinelove.repository.*;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -37,16 +33,25 @@ public class BlackPostService {
     private final UserRepository userRepository;
     private final BlackLikeService blackLikeService;
 
-    private static final Logger logger = LoggerFactory.getLogger(BlackPostService.class);
 
-    public List<BlackPostDto> getPosts(HttpServletRequest request, HttpServletResponse response, String accessToken, String sort, String cursor, int size) {
-        String userId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken).toString();
+    public List<BlackPostDto> getPosts(HttpServletRequest request,
+                                       HttpServletResponse response,
+                                       String accessToken,
+                                       String sort,
+                                       String cursor,
+                                       int size) {
+        String userId = null;
+        if (accessToken != null) {
+            // 토큰이 있으면
+            ObjectId objUserId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken);
+            userId = objUserId.toHexString();
+        }
         Pageable pageable = PageRequest.of(0, size + 1); // 다음 페이지 확인을 위해 size + 1
 
         List<BlackPost> posts;
 
         if (sort.equals("recommended")) {
-            posts = getPostsByLikesCount(cursor, pageable);
+            posts = getPostsByHotScore(cursor);
         } else if (sort.equals("latest")) {
             posts = getPostsByLatest(cursor, pageable);
         } else {
@@ -69,7 +74,12 @@ public class BlackPostService {
     }
 
     public List<BlackPostDto> getBestPosts(HttpServletRequest request, HttpServletResponse response, String accessToken) {
-        String userId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken).toString();
+        String userId = null;
+        if (accessToken != null) {
+            // 토큰이 있으면
+            ObjectId objUserId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken);
+            userId = objUserId.toHexString();
+        }
         List<BlackPost> posts = blackPostRepository.findTop3ByOrderByLikeCountDesc();
 
         // 사용자 좋아요 정보 가져오기
@@ -90,18 +100,65 @@ public class BlackPostService {
         }
     }
 
-    private List<BlackPost> getPostsByLikesCount(String cursor, Pageable pageable) {
-        if (cursor == null) {
-            return blackPostRepository.findAllByOrderByLikeCountDescPostIdDesc(pageable);
-        } else {
-            String[] cursorParts = cursor.split("_");
-            int likesCount = Integer.parseInt(cursorParts[0]);
-            ObjectId postId = new ObjectId(cursorParts[1]);
+    private List<BlackPost> getPostsByHotScore(String cursor) {
+        // 1. 모든 게시물 로드 (주의: 데이터 많으면 부담)
+        List<BlackPost> allPosts = blackPostRepository.findAll();
 
-            return blackPostRepository.findByLikeCountLessThanEqualAndPostIdLessThanOrderByLikeCountDescPostIdDesc(
-                    likesCount, postId, pageable
-            );
+        // 2. 각 게시물 Hot Score 계산 & 임시 저장
+        for (BlackPost post : allPosts) {
+            // post.getHotScore()를 사용하여 점수 계산
+            double hotScore = computeHotScore(post);
+            post.setTempHotScore(hotScore);
         }
+
+        // 3. 정렬: hotScore desc, 그 다음 postId desc
+        allPosts.sort((p1, p2) -> {
+            int cmp = Double.compare(p2.getTempHotScore(), p1.getTempHotScore());
+            if (cmp != 0) return cmp;
+            // hotScore 같다면 postId desc
+            return p2.getPostId().compareTo(p1.getPostId());
+        });
+
+        // 4. 커서가 있다면, "hotScore_postId" 형태로 파싱 → 필터링
+        if (cursor != null) {
+            String[] parts = cursor.split("_");
+            double cursorScore = Double.parseDouble(parts[0]);
+            ObjectId cursorPostId = new ObjectId(parts[1]);
+
+            // 'p2.getTempHotScore() < cursorScore || (== && p2.getPostId() < cursorPostId)'인 게시물만 남김
+            allPosts = allPosts.stream()
+                    .filter(p -> {
+                        double s = p.getTempHotScore();
+                        int cmpScore = Double.compare(s, cursorScore);
+                        if (cmpScore < 0) {
+                            return true; // s < cursorScore
+                        } else if (cmpScore == 0) {
+                            // s == cursorScore => postId < cursorPostId
+                            return p.getPostId().compareTo(cursorPostId) < 0;
+                        }
+                        return false;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return allPosts;
+    }
+
+    private double computeHotScore(BlackPost post) {
+        // 1. likeCount
+        int likes = post.getLikeCount();
+
+        // 2. ObjectId -> 생성 시간 (초 단위)
+        long createdSec = post.getPostId().getTimestamp();
+        long nowSec = System.currentTimeMillis() / 1000L;
+        long ageSec = nowSec - createdSec;
+        if (ageSec < 1) {
+            ageSec = 1;
+        }
+
+        // 3. 간단한 공식: likeCount / (ageSec ^ 1.5)
+        double hotScore = likes / Math.pow(ageSec, 1.5);
+        return hotScore;
     }
 
     public String getNextCursor(List<BlackPostDto> dtos, String sort) {
@@ -116,11 +173,8 @@ public class BlackPostService {
         BlackPostDto lastDto = dtos.get(dtos.size() - 1);
 
         if ("recommended".equalsIgnoreCase(sort)) {
-            // likesCount_postId 형식의 커서 반환
-            return String.format("%d_%s", lastDto.getLikeCount(), lastDto.getPostId());
-
             // hotScore_postId 형식의 커서 반환
-            // return String.format("%f_%s", lastDto.getHotScore(), lastDto.getPostId().toHexString());
+            return String.format("%f_%s", lastDto.getHotScore(), lastDto.getPostId());
         } else {
             // postId를 커서로 반환
             return lastDto.getPostId();
@@ -145,7 +199,8 @@ public class BlackPostService {
         dto.setMethodNumber(post.getMethodNumber());
         dto.setLikeCount(post.getLikeCount());
         dto.setLikedByUser(likedPostIds.contains(post.getPostId()));
-        // dto.setHotScore(post.getHotScore());
+        dto.setHotScore(post.getTempHotScore());
+
         return dto;
     }
 
@@ -205,7 +260,6 @@ public class BlackPostService {
                 .content(blackRequestDto.getContent())
                 .methodNumber(blackRequestDto.getMethodNumber())
                 .likeCount(0)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package sideproject.madeleinelove.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sideproject.madeleinelove.base.ApiResponse;
 import sideproject.madeleinelove.base.SuccessStatus;
 import sideproject.madeleinelove.dto.*;
+import sideproject.madeleinelove.exception.TokenException;
 import sideproject.madeleinelove.service.BlackPostService;
 import sideproject.madeleinelove.service.TokenServiceImpl;
 import jakarta.validation.Valid;
@@ -33,7 +35,7 @@ public class BlackPostController {
 
     @DeleteMapping("/black/{postId}")
     public ResponseEntity<?> deleteBlackPost(HttpServletRequest request, HttpServletResponse response,
-                                             @Valid @RequestHeader("Authorization") String authorizationHeader,
+                                             @RequestHeader("Authorization") String authorizationHeader,
                                              @PathVariable String postId) {
         try{
             TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
@@ -46,18 +48,27 @@ public class BlackPostController {
         }
     }
 
+    @Operation(security = {})
     @GetMapping("/black/post")
     public ResponseEntity<PagedResponse<BlackPostDto>> getPosts(
             HttpServletRequest request, HttpServletResponse response,
-            @Valid @RequestHeader("Authorization") String authorizationHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size) {
-        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
-        List<BlackPostDto> dtos = blackPostService.getPosts(request, response, accessTokenToUse.getAccessToken(), sort, cursor, size);
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                TokenDTO.TokenResponse tokenRes = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+                accessToken = tokenRes.getAccessToken();
+            } catch (TokenException e) {
+                accessToken = null;
+            }
+        }
+
+        List<BlackPostDto> dtos = blackPostService.getPosts(request, response, accessToken, sort, cursor, size);
 
         String nextCursor = blackPostService.getNextCursor(dtos, sort);
-
         PagedResponse<BlackPostDto> pagedResponse = new PagedResponse<>();
         pagedResponse.setData(dtos);
         pagedResponse.setNextCursor(nextCursor);
@@ -65,13 +76,22 @@ public class BlackPostController {
         return ResponseEntity.ok(pagedResponse);
     }
 
+    @Operation(security = {})
     @GetMapping("/black/post/best")
     public ResponseEntity<PagedResponse<BlackPostDto>> getBestPosts(
             HttpServletRequest request, HttpServletResponse response,
-            @Valid @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
     ) {
-        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
-        List<BlackPostDto> dtos = blackPostService.getBestPosts(request, response, accessTokenToUse.getAccessToken());
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                TokenDTO.TokenResponse tokenRes = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+                accessToken = tokenRes.getAccessToken();
+            } catch (TokenException e) {
+                accessToken = null;
+            }
+        }
+        List<BlackPostDto> dtos = blackPostService.getBestPosts(request, response, accessToken);
 
         PagedResponse<BlackPostDto> pagedResponse = new PagedResponse<>();
         pagedResponse.setData(dtos);
@@ -81,8 +101,8 @@ public class BlackPostController {
 
     @PostMapping("/black")
     public ResponseEntity<ApiResponse<Object>> createBlackPost(HttpServletRequest request, HttpServletResponse response,
-                                                               @Valid @RequestHeader("Authorization") String authorizationHeader,
-                                                               @Valid @RequestBody BlackRequestDto blackRequestDto) {
+                                                               @RequestHeader("Authorization") String authorizationHeader,
+                                                               @RequestBody BlackRequestDto blackRequestDto) {
 
         TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
         blackPostService.saveBlackPost(request, response, accessTokenToUse.getAccessToken(), blackRequestDto);

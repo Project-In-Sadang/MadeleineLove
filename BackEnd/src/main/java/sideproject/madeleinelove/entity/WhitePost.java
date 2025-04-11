@@ -4,6 +4,7 @@ import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -23,8 +24,10 @@ public class WhitePost implements Post {
     private String content;
     private Integer methodNumber;
     private Integer likeCount;
-    @CreatedDate
-    @Field(name = "created_at")
-    private LocalDateTime createdAt;
+    private Double tempHotScore;
 
+    @Override
+    public LocalDateTime getCreatedAt() {
+        return null;
+    }
 }
