@@ -92,7 +92,7 @@ public class BlackPostService {
     }
 
     private List<BlackPost> getPostsByLatest(String cursor, Pageable pageable) {
-        if (cursor == null) {
+        if (cursor == null || cursor.isBlank()) {
             return blackPostRepository.findAllByOrderByPostIdDesc(pageable);
         } else {
             ObjectId cursorId = new ObjectId(cursor);
@@ -119,29 +119,30 @@ public class BlackPostService {
             return p2.getPostId().compareTo(p1.getPostId());
         });
 
-        // 4. 커서가 있다면, "hotScore_postId" 형태로 파싱 → 필터링
-        if (cursor != null) {
-            String[] parts = cursor.split("_");
-            double cursorScore = Double.parseDouble(parts[0]);
-            ObjectId cursorPostId = new ObjectId(parts[1]);
-
-            // 'p2.getTempHotScore() < cursorScore || (== && p2.getPostId() < cursorPostId)'인 게시물만 남김
-            allPosts = allPosts.stream()
-                    .filter(p -> {
-                        double s = p.getTempHotScore();
-                        int cmpScore = Double.compare(s, cursorScore);
-                        if (cmpScore < 0) {
-                            return true; // s < cursorScore
-                        } else if (cmpScore == 0) {
-                            // s == cursorScore => postId < cursorPostId
-                            return p.getPostId().compareTo(cursorPostId) < 0;
-                        }
-                        return false;
-                    })
-                    .collect(Collectors.toList());
+        // 4. 커서가 null이거나 빈 문자열("")이면 -> 첫 페이지 (필터링 안 함)
+        if (cursor == null || cursor.isBlank()) {
+            return allPosts;
         }
 
-        return allPosts;
+        // "hotScore_postId" 형태로 파싱 → 필터링
+        String[] parts = cursor.split("_");
+        double cursorScore = Double.parseDouble(parts[0]);
+        ObjectId cursorPostId = new ObjectId(parts[1]);
+
+        // 'p2.getTempHotScore() < cursorScore || (== && p2.getPostId() < cursorPostId)'
+        // 인 게시물만 남김
+        return allPosts.stream()
+                .filter(p -> {
+                    double s = p.getTempHotScore();
+                    int cmpScore = Double.compare(s, cursorScore);
+                    if (cmpScore < 0) {
+                        return true; // s < cursorScore
+                    } else if (cmpScore == 0) {
+                        return p.getPostId().compareTo(cursorPostId) < 0;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
     }
 
     private double computeHotScore(BlackPost post) {
