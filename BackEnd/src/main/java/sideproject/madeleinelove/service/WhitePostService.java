@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import sideproject.madeleinelove.dto.WhitePostDto;
 import sideproject.madeleinelove.dto.WhiteRequestDto;
 import sideproject.madeleinelove.entity.User;
-import sideproject.madeleinelove.entity.WhiteLike;
 import sideproject.madeleinelove.entity.WhitePost;
 import sideproject.madeleinelove.exception.PostErrorResult;
 import sideproject.madeleinelove.exception.PostException;
@@ -21,9 +20,7 @@ import sideproject.madeleinelove.repository.UserRepository;
 import sideproject.madeleinelove.repository.WhiteLikeRepository;
 import sideproject.madeleinelove.repository.WhitePostRepository;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,12 +64,10 @@ public class WhitePostService {
             posts = posts.subList(0, size);
         }
 
-        // 사용자 좋아요 정보 가져오기
-        Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);
-
         // DTO 변환 및 isLiked 설정
+        final String finalUserId = userId;
         return posts.stream()
-                .map(post -> convertToDto(post, likedPostIds))
+                .map(post -> convertToDto(post, finalUserId))
                 .collect(Collectors.toList());
     }
 
@@ -85,12 +80,10 @@ public class WhitePostService {
         }
         List<WhitePost> posts = whitePostRepository.findTop3ByOrderByLikeCountDesc();
 
-        // 사용자 좋아요 정보 가져오기
-        Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);
-
         // DTO 변환 및 isLiked 설정
+        final String finalUserId = userId;
         return posts.stream()
-                .map(post -> convertToDto(post, likedPostIds))
+                .map(post -> convertToDto(post, finalUserId))
                 .collect(Collectors.toList());
     }
 
@@ -185,25 +178,23 @@ public class WhitePostService {
         }
     }
 
-    private Set<ObjectId> getUserLikedPostIds(String userId) {
-        if (userId == null) {
-            return Collections.emptySet();
-        }
-        List<WhiteLike> likes = whiteLikeRepository.findByUserId(userId);
-        return likes.stream()
-                .map(WhiteLike::getPostId)
-                .collect(Collectors.toSet());
-    }
-
-    private WhitePostDto convertToDto(WhitePost post, Set<ObjectId> likedPostIds) {
+    private WhitePostDto convertToDto(WhitePost post, String userId) {
         WhitePostDto dto = new WhitePostDto();
         dto.setPostId(post.getPostId().toHexString());
         dto.setNickName(post.getNickName());
         dto.setContent(post.getContent());
         dto.setMethodNumber(post.getMethodNumber());
         dto.setLikeCount(post.getLikeCount());
-        dto.setLikedByUser(likedPostIds.contains(post.getPostId()));
         dto.setHotScore(post.getTempHotScore());
+
+        if (userId == null) {
+            dto.setLikedByUser(false);
+        } else {
+            String key = "whitepost:" + post.getPostId().toHexString() + ":likes";
+            boolean likedByUser = redisTemplate.opsForSet().isMember(key, userId);
+            dto.setLikedByUser(likedByUser);
+        }
+
         return dto;
     }
 

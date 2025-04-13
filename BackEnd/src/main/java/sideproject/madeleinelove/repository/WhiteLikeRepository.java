@@ -21,5 +21,5 @@ public interface WhiteLikeRepository extends MongoRepository<WhiteLike, ObjectId
     @Transactional
     void deleteAllByUserId(ObjectId userId);
 
-    List<WhiteLike> findByUserId(String userId);
+    List<WhiteLike> findByUserId(ObjectId userId);
 }

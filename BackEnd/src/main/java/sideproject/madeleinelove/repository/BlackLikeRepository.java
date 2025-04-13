@@ -20,6 +20,6 @@ public interface BlackLikeRepository extends MongoRepository<BlackLike, ObjectId
     @Transactional
     void deleteAllByUserId(ObjectId userId);
 
-    List<BlackLike> findByUserId(String userId);
+    List<BlackLike> findByUserId(ObjectId userId);
 
 }

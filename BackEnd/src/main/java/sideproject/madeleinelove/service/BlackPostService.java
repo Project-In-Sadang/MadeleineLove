@@ -17,9 +17,7 @@ import sideproject.madeleinelove.exception.UserErrorResult;
 import sideproject.madeleinelove.exception.UserException;
 import sideproject.madeleinelove.repository.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,12 +62,10 @@ public class BlackPostService {
             posts = posts.subList(0, size);
         }
 
-        // 사용자 좋아요 정보 가져오기
-        Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);
-
         // DTO 변환 및 isLiked 설정
+        final String finalUserId = userId;
         return posts.stream()
-                .map(post -> convertToDto(post, likedPostIds))
+                .map(post -> convertToDto(post, finalUserId))
                 .collect(Collectors.toList());
     }
 
@@ -82,12 +78,10 @@ public class BlackPostService {
         }
         List<BlackPost> posts = blackPostRepository.findTop3ByOrderByLikeCountDesc();
 
-        // 사용자 좋아요 정보 가져오기
-        Set<ObjectId> likedPostIds = getUserLikedPostIds(userId);
-
         // DTO 변환 및 isLiked 설정
+        final String finalUserId = userId;
         return posts.stream()
-                .map(post -> convertToDto(post, likedPostIds))
+                .map(post -> convertToDto(post, finalUserId))
                 .collect(Collectors.toList());
     }
 
@@ -182,25 +176,22 @@ public class BlackPostService {
         }
     }
 
-    private Set<ObjectId> getUserLikedPostIds(String userId) {
-        if (userId == null) {
-            return Collections.emptySet();
-        }
-        List<BlackLike> likes = blackLikeRepository.findByUserId(userId);
-        return likes.stream()
-                .map(BlackLike::getPostId)
-                .collect(Collectors.toSet());
-    }
-
-    private BlackPostDto convertToDto(BlackPost post, Set<ObjectId> likedPostIds) {
+    private BlackPostDto convertToDto(BlackPost post, String userId) {
         BlackPostDto dto = new BlackPostDto();
         dto.setPostId(post.getPostId().toHexString());
         dto.setNickName(post.getNickName());
         dto.setContent(post.getContent());
         dto.setMethodNumber(post.getMethodNumber());
         dto.setLikeCount(post.getLikeCount());
-        dto.setLikedByUser(likedPostIds.contains(post.getPostId()));
         dto.setHotScore(post.getTempHotScore());
+
+        if (userId == null) {
+            dto.setLikedByUser(false);
+        } else {
+            String key = "blackpost:" + post.getPostId().toHexString() + ":likes";
+            boolean likedByUser = redisTemplate.opsForSet().isMember(key, userId);
+            dto.setLikedByUser(likedByUser);
+        }
 
         return dto;
     }
