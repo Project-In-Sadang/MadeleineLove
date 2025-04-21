@@ -1,9 +1,9 @@
 import api from './basic';
 
-const socialUrl = process.env.NEXT_PUBLIC_SOCIAL_LOGIN_URL;
+const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
 function redirectToSocial(platform: string) {
-    const redirectUrl = `${socialUrl}/oauth2/authorization/${platform}`;
+    const redirectUrl = `${serverUrl}/oauth2/authorization/${platform}`;
     window.location.href = redirectUrl;
 }
 
