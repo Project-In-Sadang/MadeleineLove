@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sideproject.madeleinelove.base.ApiResponse;
@@ -33,4 +32,16 @@ public class UserController {
 
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW, null);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Object>> logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @Valid @RequestHeader("Authorization") String authorizationHeader) {
+        TokenDTO.TokenResponse accessTokenToUse = tokenServiceImpl.validateAccessToken(request, response, authorizationHeader);
+        userService.logout(request, response, accessTokenToUse.getAccessToken());
+        return ApiResponse.onSuccess(SuccessStatus._OK, null);
+
+    }
+
 }

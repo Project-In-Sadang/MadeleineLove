@@ -20,6 +20,7 @@ import sideproject.madeleinelove.repository.UserRepository;
 import sideproject.madeleinelove.repository.WhiteLikeRepository;
 import sideproject.madeleinelove.repository.WhitePostRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -258,6 +259,7 @@ public class WhitePostService {
                 .content(whiteRequestDto.getContent())
                 .methodNumber(whiteRequestDto.getMethodNumber())
                 .likeCount(0)
+                .createdAt((LocalDateTime.now()))
                 .build();
     }
 }

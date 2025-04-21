@@ -17,6 +17,7 @@ import sideproject.madeleinelove.exception.UserErrorResult;
 import sideproject.madeleinelove.exception.UserException;
 import sideproject.madeleinelove.repository.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -252,6 +253,7 @@ public class BlackPostService {
                 .content(blackRequestDto.getContent())
                 .methodNumber(blackRequestDto.getMethodNumber())
                 .likeCount(0)
+                .createdAt((LocalDateTime.now()))
                 .build();
     }
 }

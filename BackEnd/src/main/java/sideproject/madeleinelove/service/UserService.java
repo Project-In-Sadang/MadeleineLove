@@ -112,4 +112,13 @@ public class UserService {
 
         response.addHeader("Set-Cookie", responseCookie.toString());
     }
+
+    // 로그아웃 처리
+    public void logout(HttpServletRequest request, HttpServletResponse response, String accessToken) {
+        ObjectId userId = tokenServiceImpl.getUserIdFromAccessToken(request, response, accessToken);
+
+        //JWT 토큰 처리
+        handleTokenCleanup(accessToken, userId);
+        handleCookieCleanup(response);
+    }
 }
