@@ -80,6 +80,13 @@ export default function SsulBox({ data, type, apiType }: SsulBoxProps) {
         }
     };
 
+    const iconMap = {
+        black: [Melt, Fly, Burn, Eat],
+        white: [Romance, Happy, Refresh, Sad],
+    };
+
+    const SelectedIcon = iconMap[type][data.methodNumber - 1];
+
     return (
         <div
             className="flex flex-col w-full h-[173px] bg-[#EBE5FF] text-base
@@ -92,9 +99,7 @@ export default function SsulBox({ data, type, apiType }: SsulBoxProps) {
                         className="rounded-[10px] gap-1 pl-2 pr-3 py-1
                 shadow-[-3px_-3px_13px_#62467d80_inset,-4px_-4px_6px_rgba(0,_0,_0,_0.1)_inset]"
                     >
-                        {type === 'black'
-                            ? [<Melt />, <Fly />, <Burn />, <Eat />][data.methodNumber - 1]
-                            : [<Romance />, <Happy />, <Refresh />, <Sad />][data.methodNumber - 1]}
+                        <SelectedIcon />
                         {data.nickName}
                     </FlexBox>
                     {apiType === 'my' && (
