@@ -1,14 +1,13 @@
-import Image from 'next/image';
 import FlexBox from '@/components/FlexBox';
 
 interface MethodButtonProps {
-    heartSrc: string;
+    Heart: React.FC<React.SVGProps<SVGSVGElement>>;
     description: string;
     isSelected: boolean;
     onClick: () => void;
 }
 
-export default function MethodButton({ heartSrc, description, isSelected, onClick }: MethodButtonProps) {
+export default function MethodButton({ Heart, description, isSelected, onClick }: MethodButtonProps) {
     return (
         <button onClick={onClick} className="w-full">
             <FlexBox
@@ -17,7 +16,7 @@ export default function MethodButton({ heartSrc, description, isSelected, onClic
             ${isSelected ? 'bg-[#D2CDE9]' : 'bg-white'} rounded-xl
             transition-colors duration-300`}
             >
-                <Image src={heartSrc} alt={'heart'} width={30} height={30} />
+                <Heart width={30} />
                 {description}
             </FlexBox>
         </button>

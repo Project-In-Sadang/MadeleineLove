@@ -1,13 +1,12 @@
-import Image from 'next/image';
 import FlexBox from '@/components/FlexBox';
 
 interface MenuButtonProps {
     onClick: () => void;
-    iconSrc: string; 
+    Icon: React.FC<React.SVGProps<SVGSVGElement>>;
     title: string;
 }
 
-export default function MenuButton({ onClick, iconSrc, title }: MenuButtonProps) {
+export default function MenuButton({ onClick, Icon, title }: MenuButtonProps) {
     return (
         <button onClick={onClick} className="w-full">
             <FlexBox
@@ -15,7 +14,7 @@ export default function MenuButton({ onClick, iconSrc, title }: MenuButtonProps)
                 className="w-full font-medium shadow-[10px_10px_20px_0px_rgba(0,0,0,0.25)]
                  bg-[#eae5ff] rounded-[10px] gap-1 py-4 whitespace-nowrap"
             >
-                <Image src={iconSrc} alt="menuicon" width={30} height={30} />
+                <Icon width={30} />
                 {title}
             </FlexBox>
         </button>

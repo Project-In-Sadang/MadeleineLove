@@ -76,7 +76,7 @@ export default function Main() {
             <MovieCarousel />
             <FlexBox className="w-full px-10 h-full items-end pb-[60px] gap-3.5">
                 {menuData.map((item, index) => (
-                    <MenuButton key={index} iconSrc={item.iconSrc} title={item.title} onClick={item.onClick} />
+                    <MenuButton key={index} Icon={item.iconSrc} title={item.title} onClick={item.onClick} />
                 ))}
             </FlexBox>
             {showModal && (

@@ -1,6 +1,5 @@
-import Image from 'next/image';
-import menu from '@/assets/icons/menu.svg';
-import chevron from '@/assets/icons/chevron.svg';
+import Menu from '@/assets/icons/menu.svg';
+import Chevron from '@/assets/icons/chevron.svg';
 import FlexBox from '@/components/FlexBox';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -20,13 +19,11 @@ export default function Header({ type, chevronOnClick, onLogout, onWithdraw }: H
         <div className="z-50 w-full">
             <FlexBox className={`w-full p-10 ${type === 'main' ? 'justify-between' : 'justify-start gap-4'}`}>
                 {type !== 'main' && (
-                    <Image
-                        src={chevron}
-                        alt="chevronicon"
+                    <Chevron
                         onClick={() => {
                             type === 'write' ? chevronOnClick?.() : router.push('/main');
                         }}
-                        className="cursor-pointer"
+                        className="cursor-pointer w-6 h-6"
                     />
                 )}
                 <div className="text-3xl text-[#593EC0]">
@@ -36,13 +33,11 @@ export default function Header({ type, chevronOnClick, onLogout, onWithdraw }: H
                     <span className="font-extralight">e</span>
                 </div>
                 {type === 'main' && (
-                    <Image
-                        src={menu}
-                        alt="menuicon"
+                    <Menu
                         onClick={() => {
                             setIsMenuOpen((prev) => !prev);
                         }}
-                        className="cursor-pointer"
+                        className="cursor-pointer w-6"
                     />
                 )}
             </FlexBox>

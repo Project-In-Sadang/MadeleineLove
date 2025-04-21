@@ -88,25 +88,25 @@ export default function Black() {
                     <div className="grid grid-cols-2 gap-3.5">
                         <MethodButton
                             description="낭만있게"
-                            heartSrc={romance}
+                            Heart={romance}
                             isSelected={selectedMethod === 1}
                             onClick={() => setSelectedMethod(1)}
                         />
                         <MethodButton
                             description="유쾌하게"
-                            heartSrc={happy}
+                            Heart={happy}
                             isSelected={selectedMethod === 2}
                             onClick={() => setSelectedMethod(2)}
                         />
                         <MethodButton
                             description="풋풋하게"
-                            heartSrc={refresh}
+                            Heart={refresh}
                             isSelected={selectedMethod === 3}
                             onClick={() => setSelectedMethod(3)}
                         />
                         <MethodButton
                             description="애절하게"
-                            heartSrc={sad}
+                            Heart={sad}
                             isSelected={selectedMethod === 4}
                             onClick={() => setSelectedMethod(4)}
                         />

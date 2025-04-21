@@ -1,8 +1,7 @@
 import FlexBox from '@/components/FlexBox';
-import Image from 'next/image';
 
 interface WelcomeProps {
-    iconSrc: string;
+    Icon: React.FC<React.SVGProps<SVGSVGElement>>;
     description: string;
     className?: string;
     iconSz: number;
@@ -10,7 +9,7 @@ interface WelcomeProps {
 }
 
 export default function WelcomeButton({
-    iconSrc,
+    Icon,
     className = 'bg-white text-black',
     onClick,
     description,
@@ -23,7 +22,7 @@ export default function WelcomeButton({
                     text-base rounded-md font-semibold
                     ${className}`}
             >
-                <Image src={iconSrc} alt="welcomeicon" width={iconSz} height={iconSz} />
+                <Icon width={iconSz} />
                 {description}
             </FlexBox>
         </button>
