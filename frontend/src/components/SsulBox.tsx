@@ -1,17 +1,14 @@
 import FlexBox from '@/components/FlexBox';
-import Image from 'next/image';
-import trash from '@/assets/icons/trash.svg';
-import fly from '@/assets/icons/heart/fly.svg';
-import eat from '@/assets/icons/heart/eat.svg';
-import burn from '@/assets/icons/heart/burn.svg';
-import melt from '@/assets/icons/heart/melt.svg';
-import romance from '@/assets/icons/heart/romance.svg';
-import happy from '@/assets/icons/heart/happy.svg';
-import refresh from '@/assets/icons/heart/refresh.svg';
-import sad from '@/assets/icons/heart/sad.svg';
-import pink from '@/assets/icons/heart/pink.svg';
-import purple from '@/assets/icons/heart/purple.svg';
-import gray from '@/assets/icons/heart/gray.svg';
+import Trash from '@/assets/icons/trash.svg';
+import Fly from '@/assets/icons/heart/fly.svg';
+import Eat from '@/assets/icons/heart/eat.svg';
+import Burn from '@/assets/icons/heart/burn.svg';
+import Melt from '@/assets/icons/heart/melt.svg';
+import Romance from '@/assets/icons/heart/romance.svg';
+import Happy from '@/assets/icons/heart/happy.svg';
+import Refresh from '@/assets/icons/heart/refresh.svg';
+import Sad from '@/assets/icons/heart/sad.svg';
+import Heart from '@/assets/icons/heart/heart.svg';
 import { HeartBody } from '@/utils/type';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -95,20 +92,13 @@ export default function SsulBox({ data, type, apiType }: SsulBoxProps) {
                         className="rounded-[10px] gap-1 pl-2 pr-3 py-1
                 shadow-[-3px_-3px_13px_#62467d80_inset,-4px_-4px_6px_rgba(0,_0,_0,_0.1)_inset]"
                     >
-                        <Image
-                            width={20}
-                            height={20}
-                            src={
-                                type === 'black'
-                                    ? [melt, fly, burn, eat][data.methodNumber - 1]
-                                    : [romance, happy, refresh, sad][data.methodNumber - 1]
-                            }
-                            alt="methodheart"
-                        />
+                        {type === 'black'
+                            ? [<Melt />, <Fly />, <Burn />, <Eat />][data.methodNumber - 1]
+                            : [<Romance />, <Happy />, <Refresh />, <Sad />][data.methodNumber - 1]}
                         {data.nickName}
                     </FlexBox>
                     {apiType === 'my' && (
-                        <Image
+                        <Trash
                             className="cursor-pointer"
                             onClick={() => {
                                 setModalState('trash');
@@ -116,20 +106,24 @@ export default function SsulBox({ data, type, apiType }: SsulBoxProps) {
                             }}
                             width={22}
                             height={22}
-                            src={trash}
-                            alt="trash"
                         />
                     )}
                 </FlexBox>
                 <FlexBox className="gap-1">
                     {data.likeCount}
-                    <Image
-                        className="cursor-pointer"
+                    <Heart
+                        className={`cursor-pointer ${
+                            type === 'black'
+                                ? data.likedByUser
+                                    ? 'fill-[#6F3AD9]'
+                                    : 'fill-[#DCDCDC]'
+                                : data.likedByUser
+                                ? 'fill-[#EB3D73]'
+                                : 'fill-[#DCDCDC]'
+                        }`}
                         width={22}
                         height={22}
-                        src={type === 'black' ? (data.likedByUser ? purple : gray) : data.likedByUser ? pink : gray}
                         onClick={handleHeart}
-                        alt="heart"
                     />
                 </FlexBox>
             </FlexBox>
