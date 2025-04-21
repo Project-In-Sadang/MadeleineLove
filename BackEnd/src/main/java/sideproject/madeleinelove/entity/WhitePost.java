@@ -26,6 +26,10 @@ public class WhitePost implements Post {
     private Integer likeCount;
     private Double tempHotScore;
 
+    @CreatedDate
+    @Field(name = "created_at")
+    private LocalDateTime createdAt;
+
     @Override
     public LocalDateTime getCreatedAt() {
         return null;
