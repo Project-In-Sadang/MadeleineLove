@@ -6,6 +6,7 @@ interface HeartBody {
     likeCount: number;
     likedByUser: boolean;
     createdAt?: string;
+    hotScore?: number;
 }
 
 interface PostBody {
