@@ -10,13 +10,14 @@ import sideproject.madeleinelove.dto.ErrorReasonDTO;
 @RequiredArgsConstructor
 public enum PostErrorResult implements BaseErrorCode {
 
-    NOT_FOUND_POST(HttpStatus.NOT_FOUND, "404", "존재하지 않는 포스트입니다."),
-    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "403", "사용자가 해당 포스트에 접근권한이 없습니다."),
-    ALREADY_LIKED(HttpStatus.BAD_REQUEST, "400", "이미 좋아요를 눌렀습니다."),
-    ALREADY_UNLIKED(HttpStatus.BAD_REQUEST, "400", "취소할 좋아요가 없습니다.");
+    NOT_FOUND_POST(HttpStatus.NOT_FOUND, "404", "NOT_FOUND_POST", "존재하지 않는 포스트입니다."),
+    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "403", "NOT_FOUND_POST", "사용자가 해당 포스트에 접근권한이 없습니다."),
+    ALREADY_LIKED(HttpStatus.BAD_REQUEST, "400", "ALREADY_LIKED", "이미 좋아요를 눌렀습니다."),
+    ALREADY_UNLIKED(HttpStatus.BAD_REQUEST, "400", "ALREADY_UNLIKED", "취소할 좋아요가 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
+    private final String errorCode;
     private final String message;
 
     @Override
@@ -24,6 +25,7 @@ public enum PostErrorResult implements BaseErrorCode {
         return ErrorReasonDTO.builder()
                 .isSuccess(false)
                 .code(code)
+                .errorCode(errorCode)
                 .message(message)
                 .build();
     }
@@ -34,6 +36,7 @@ public enum PostErrorResult implements BaseErrorCode {
                 .isSuccess(false)
                 .httpStatus(httpStatus)
                 .code(code)
+                .errorCode(errorCode)
                 .message(message)
                 .build();
     }
