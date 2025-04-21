@@ -10,6 +10,7 @@ function redirectToSocial(platform: string) {
 async function withdrawSocial() {
     try {
         await api.post(`/users/withdraw`);
+        localStorage.removeItem('access_token');
     } catch (error) {
         console.error('탈퇴 오류', error);
     }
@@ -18,6 +19,7 @@ async function withdrawSocial() {
 async function logoutSocial() {
     try {
         await api.post(`/users/logout`);
+        localStorage.removeItem('access_token');
     } catch (error) {
         console.error('로그아웃 오류', error);
     }
