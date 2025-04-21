@@ -5,7 +5,6 @@ import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import sideproject.madeleinelove.model.Post;
@@ -30,8 +29,4 @@ public class BlackPost implements Post {
     @Field(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Override
-    public LocalDateTime getCreatedAt() {
-        return null;
-    }
 }
